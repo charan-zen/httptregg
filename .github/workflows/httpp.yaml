@@ -3,7 +3,7 @@ name: azure-functions-charan
 on: workflow_dispatch
 
 env:
-  AZURE_FUNCTIONAPP_NAME: "apiget " # Ensure the app name is lowercase
+  AZURE_FUNCTIONAPP_NAME: "zencharanapi" # Ensure the app name is lowercase
   AZURE_FUNCTIONAPP_PACKAGE_PATH: "." # Path to your function app project
   NODE_VERSION: "18.x"
 
