@@ -1,0 +1,46 @@
+name: azure-functions-charan
+
+on: workflow_dispatch
+
+env:
+  AZURE_FUNCTIONAPP_NAME: "zencharanapi" # Ensure the app name is lowercas
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "." # Path to your function app project
+  NODE_VERSION: "18.x"
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest # For Linux, use ubuntu-latest
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v3
+
+      - name: "Login to Azure"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} # Using RBAC authentication
+
+      - name: "Set up Node.js ${{ env.NODE_VERSION }}"
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "Install Dependencies"
+        shell: pwsh
+        run: |
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          npm install
+          npm run build --if-present
+
+      - name: "Create ZIP Package"
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}\* -DestinationPath functionapp.zip -Force
+
+      - name: "Run Azure Functions Action"
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          #################
